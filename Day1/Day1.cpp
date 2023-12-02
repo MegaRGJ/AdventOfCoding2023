@@ -19,39 +19,91 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    std::string DataPathForLetterValues = "Day1Part2SpelledOutLetters.txt";
+    std::ifstream stream2;
+    stream2.open(DataPathForLetterValues);
+    
     int TotalValue = 0;
     
     for (std::string line; getline(stream, line);)
     {
-        char FoundValueAsCharArray[2];
+        std::string FoundValue;
 
-        long long int FoundDigitIndex(-1);
+        //search for the word and stash the index it was found at.
+        
         for (std::string::iterator it = line.begin(); it != line.end(); ++it)
         {
             if (isdigit(*it))
             {
-                FoundDigitIndex = std::distance(line.begin(), it);
-                FoundValueAsCharArray[0] = *it;
+                FoundValue.push_back(*it);
                 break;
+            }
+            else
+            {
+                int CurrentLine = 1;
+                stream2.clear();
+                stream2.seekg(0);
+                for (std::string WordAsNumberLine; getline(stream2, WordAsNumberLine); ++CurrentLine)
+                {
+                    size_t LengthOfWordNumber = WordAsNumberLine.length();
+                    
+                    std::string PossibleWordAsNumber = line.substr(std::distance(line.begin(), it), LengthOfWordNumber);
+
+                    if (PossibleWordAsNumber == WordAsNumberLine)
+                    {
+                        FoundValue.append(std::to_string(CurrentLine)); //Cheeky in the sense that the which line it is matches it's real value.
+                        break;
+                    }
+                }
+
+                if (FoundValue.length() == 1)
+                {
+                    break;
+                }
             }
         }
 
-        if (FoundDigitIndex == -1)
+        if (FoundValue.length() == 0)
         {
             //break as there are no digits to find in the entire string line
             break;
         }
 
-        for (std::string::reverse_iterator it = line.rbegin(); it != line.rend(); ++it) // does this loop over a empty endl or something???
+        //for (std::string::reverse_iterator it = line.rbegin(); it != line.rend(); it++) // does this loop over a empty endl or something??? yes it does reeeee
+        for (int i = line.length() - 1; i >= 0; --i)
         {
-            if (isdigit(*it))
+            if (isdigit(line[i]))
             {
-                FoundValueAsCharArray[1] = *it;
+                FoundValue.push_back(line[i]);
                 break;
+            }
+            else
+            {
+                int CurrentLine = 1;
+                // could array this data instead of just doing this as it's ew.
+                stream2.clear();
+                stream2.seekg(0);
+                for (std::string WordAsNumberLine; getline(stream2, WordAsNumberLine); ++CurrentLine)
+                {
+                    size_t LengthOfWordNumber = WordAsNumberLine.length();
+                    
+                    std::string PossibleWordAsNumber = line.substr(i, LengthOfWordNumber);
+
+                    if (PossibleWordAsNumber == WordAsNumberLine)
+                    {
+                        FoundValue.append(std::to_string(CurrentLine)); //Cheeky in the sense that the which line it is matches it's real value.
+                        break;
+                    }
+                }
+
+                if (FoundValue.length() == 2)
+                {
+                    break;
+                }
             }
         }
 
-        int Value = atoi(FoundValueAsCharArray);
+        int Value = atoi(FoundValue.data());
         std::cout << line << " : " << Value << std::endl;
         
         TotalValue += Value;
@@ -60,5 +112,6 @@ int main(int argc, char* argv[])
     std::cout << "Total Value: " << TotalValue << std::endl;
 
     stream.close();
+    stream2.close();
     return 0;
 }
