@@ -109,12 +109,14 @@ int main(int argc, char* argv[])
     }
 
     int SumOfAllSchematics(0);
+    int SumOfAllGearRatios(0);
     for (int i = 0; i < FoundParts.size(); ++i)
     {
         int WhatLineWasPartFoundOn = FoundParts[i].Line;
 
         //Could optimise the number search based on only checking lines +-1
 
+        std::vector<int> Gears;
         for (int j = 0; j < FoundNumbers.size(); ++j)
         {
             //if it's not a neighbour lets not bother looking
@@ -126,7 +128,11 @@ int main(int argc, char* argv[])
                 if (first || final)
                 {
                     //in range.
-                    SumOfAllSchematics += atoi(FoundNumbers[j].FoundNumber.data());
+                    int FoundNumberInt = atoi(FoundNumbers[j].FoundNumber.data());
+                    SumOfAllSchematics += FoundNumberInt;
+
+                    Gears.push_back(FoundNumberInt);
+                    // go in here more than once.
                     //std::cout << "In Range Number: " << FoundNumbers[j].FoundNumber << " Sym index: " << FoundParts[i].Index << " Line: "<< WhatLineWasPartFoundOn << std::endl;
                 }
                 else
@@ -135,9 +141,17 @@ int main(int argc, char* argv[])
                 }
             }
         }
+
+        if (Gears.size() == 2)
+        {
+            SumOfAllGearRatios += Gears[0] * Gears[1];
+        }
     }
+
+    //any * symbol next to two parts.
     
     std::cout << "Total Sum of Schematics: " << SumOfAllSchematics << std::endl;
+    std::cout << "Total Sum of Gear Ratios: " << SumOfAllGearRatios << std::endl;
             
     return 0;
 }
