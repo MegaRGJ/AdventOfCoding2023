@@ -40,7 +40,7 @@ struct FFoundNumber
         : FoundNumber(InFoundNumber)
         , Line(InLine)
         , LastIndexInLine(InLastIndexInLine)
-        , FirstIndexInLine((InLastIndexInLine - InFoundNumber.length()) - 1)
+        , FirstIndexInLine((InLastIndexInLine - (InFoundNumber.length() - 1)))
     {
         
     }
@@ -54,6 +54,8 @@ struct FFoundNumber
     int FirstIndexInLine;
 };
 
+bool IsInBounds(int Value, int Low, int High);
+
 int main(int argc, char* argv[])
 {
     string DataPath = "Day3Data.txt";
@@ -66,11 +68,11 @@ int main(int argc, char* argv[])
     std::vector<std::string> Lines;
     for (std::string LineData; getline(Stream, LineData);)
     {
-        Lines.push_back(LineData);
+        Lines.emplace_back(LineData);
     }
 
-    std::vector<FFoundPart> FoundParts;
-    std::vector<FFoundNumber> FoundNumbers;
+   std::vector<FFoundPart> FoundParts;
+   std::vector<FFoundNumber> FoundNumbers;
     
     for (int i = 0; i < Lines.size(); ++i)
     {
@@ -87,7 +89,7 @@ int main(int argc, char* argv[])
             {
                 if (FoundNumber != "")
                 {
-                    FoundNumbers.push_back(FFoundNumber(FoundNumber, i, j));
+                    FoundNumbers.push_back(FFoundNumber(FoundNumber, i, j - 1));
                     
                     FoundNumber = "";
                 }
@@ -97,6 +99,11 @@ int main(int argc, char* argv[])
                 {
                     FoundParts.push_back(FFoundPart(i, j));
                 }
+            }
+
+            if (Lines[i].size() == (j + 1) && FoundNumber != "") 
+            {
+                FoundNumbers.push_back(FFoundNumber(FoundNumber, i, j)); // might be wrong now.... values
             }
         }
     }
@@ -113,10 +120,14 @@ int main(int argc, char* argv[])
             //if it's not a neighbour lets not bother looking
             if (!(FoundNumbers[j].Line > WhatLineWasPartFoundOn + 1 || FoundNumbers[j].Line < WhatLineWasPartFoundOn - 1))
             {
-                if ((FoundNumbers[j].FirstIndexInLine) <= FoundParts[i].Index  && FoundParts[i].Index <= (FoundNumbers[j].LastIndexInLine))
+                bool first = IsInBounds(FoundNumbers[j].FirstIndexInLine, FoundParts[i].Index - 1, FoundParts[i].Index + 1);
+                bool final = IsInBounds(FoundNumbers[j].LastIndexInLine, FoundParts[i].Index - 1, FoundParts[i].Index + 1); // bounds checks are wrong???
+                
+                if (first || final)
                 {
                     //in range.
                     SumOfAllSchematics += atoi(FoundNumbers[j].FoundNumber.data());
+                    //std::cout << "In Range Number: " << FoundNumbers[j].FoundNumber << " Sym index: " << FoundParts[i].Index << " Line: "<< WhatLineWasPartFoundOn << std::endl;
                 }
                 else
                 {
@@ -125,15 +136,13 @@ int main(int argc, char* argv[])
             }
         }
     }
-
-    //529676
-    std::cout << "Total Sum of Schematics: " << SumOfAllSchematics << std::endl; // 536667
     
-    //get the symbs and store line and index in the line.
-
-    // use that line plus index to create a range that over lap..
-
-    
-    
+    std::cout << "Total Sum of Schematics: " << SumOfAllSchematics << std::endl;
+            
     return 0;
+}
+
+bool IsInBounds(int Value, int Low, int High)
+{
+    return !(Value < Low) && !(High < Value);
 }
